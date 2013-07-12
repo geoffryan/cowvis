@@ -8,5 +8,5 @@ To install:
 	3) Type make.
 
 To run:
-	cowvis <cow_output.hdf5>
+	cowvis <cow_output.h5>
 
