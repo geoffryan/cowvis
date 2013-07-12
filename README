@@ -1,4 +1,12 @@
 An OpenGL visualization tool for C.O.W. by Geoff Ryan and Jonathan Zrake.
 
-Just type Make?
+Currently built for Mac OSX, must have OpenGL and GLUT frameworks installed.
+
+To install:
+	1) Copy cow/Makefile.in.template to the main directory as Makefile.in
+	2) Edit Makefile.in to reflect location of local HDF5 libraries, set "USE_HDF5" to 1.
+	3) Type make.
+
+To run:
+	cowvis <cow_output.hdf5>
 
