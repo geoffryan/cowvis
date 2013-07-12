@@ -1,4 +1,4 @@
-MAKEFILE_IN = Makefile.in
+MAKEFILE_IN = $(HOME)/Coding/CAL/cowvis/Makefile.in
 include $(MAKEFILE_IN)
 
 CFLAGS ?= -Wall
@@ -15,6 +15,7 @@ INCS = -I/usr/X11R6/include -I./cow/
 default: bin/cowvis
 
 bin/cowvis: src/cowvis.c $(LOCLIBS)
+	@mkdir -p bin
 	$(CC) $(CFLAGS) -o $@ $^ $(INCS) $(LIBS)
 	
 cow/libcow.a: .FORCE
