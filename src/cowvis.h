@@ -14,3 +14,4 @@ void SpecialFunc(int key, int x, int y);
 int cv_create_window(char *title, int x, int y, int width, int height);
 void cv_init_gl(int width, int height);
 void cv_exit();
+void cv_wirecube(float side);

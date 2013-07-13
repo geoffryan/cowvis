@@ -45,12 +45,28 @@ void DisplayFunc()
 	glRotatef(rotx, 1.0f, 0.0f, 0.0f);
 	
 	glBegin(GL_QUADS);
-	glColor3f(1.0f, 1.0f, 1.0f);
-	glVertex3f( 0.5f, 0.5f, 0.5f);
-	glVertex3f(-0.5f, 0.5f, 0.5f);
-	glVertex3f(-0.5f,-0.5f, 0.5f);
-	glVertex3f( 0.5f,-0.5f, 0.5f);
+	glColor3f(0.5f, 0.5f, 0.0f);
+	glVertex3f( 0.5f, 0.5f, 0.0f);
+	glVertex3f(-0.5f, 0.5f, 0.0f);
+	glVertex3f(-0.5f,-0.5f, 0.0f);
+	glVertex3f( 0.5f,-0.5f, 0.0f);
 	glEnd();
+	glBegin(GL_QUADS);
+	glColor3f(0.5f, 0.0f, 0.5f);
+	glVertex3f( 0.5f, 0.0f, 0.5f);
+	glVertex3f(-0.5f, 0.0f, 0.5f);
+	glVertex3f(-0.5f, 0.0f,-0.5f);
+	glVertex3f( 0.5f, 0.0f,-0.5f);
+	glEnd();
+	glBegin(GL_QUADS);
+	glColor3f(0.0f, 0.5f, 0.5f);
+	glVertex3f( 0.0f, 0.5f, 0.5f);
+	glVertex3f( 0.0f, 0.5f,-0.5f);
+	glVertex3f( 0.0f,-0.5f,-0.5f);
+	glVertex3f( 0.0f,-0.5f, 0.5f);
+	glEnd();
+	
+	cv_wirecube(1.0f);
 	
 	glutSwapBuffers();
 }
@@ -154,6 +170,48 @@ void cv_exit()
 	cow_domain_del(dom);
 	cv_message("Everything swept under the rug.");
 	exit(0);
+}
+
+void cv_wirecube(float side)
+{
+	float disp = 0.5f * side;
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( disp, disp, disp);
+	glVertex3f(-disp, disp, disp);
+	glVertex3f(-disp,-disp, disp);
+	glVertex3f( disp,-disp, disp);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( disp, disp,-disp);
+	glVertex3f( disp,-disp,-disp);
+	glVertex3f(-disp,-disp,-disp);
+	glVertex3f(-disp, disp,-disp);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( disp, disp,-disp);
+	glVertex3f(-disp, disp,-disp);
+	glVertex3f(-disp, disp, disp);
+	glVertex3f( disp, disp, disp);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( disp,-disp,-disp);
+	glVertex3f( disp,-disp, disp);
+	glVertex3f(-disp,-disp, disp);
+	glVertex3f(-disp,-disp,-disp);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f( disp, disp,-disp);
+	glVertex3f( disp, disp, disp);
+	glVertex3f( disp,-disp, disp);
+	glVertex3f( disp,-disp,-disp);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(-disp, disp,-disp);
+	glVertex3f(-disp,-disp,-disp);
+	glVertex3f(-disp,-disp, disp);
+	glVertex3f(-disp, disp, disp);
+	glEnd();
 }
 
 int main(int argc, char *argv[])
