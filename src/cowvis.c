@@ -118,6 +118,14 @@ void KeyboardFunc(unsigned char key, int x, int y)
 			cm++;
 			break;
 			
+		case 'm':
+			mem++;
+			mem = mem % cow_dfield_getnmembers(dfield);
+			cv_build_cutplane(0);
+			cv_build_cutplane(1);
+			cv_build_cutplane(2);
+			break;
+			
 		case 'x':
 			cutplanes[0].ind++;
 			cv_build_cutplane(0);
@@ -291,7 +299,7 @@ void cv_wirecube(float side)
 void cv_build_cutplane(int ax)
 {
 	int ind[3];
-	int ng, sx, sy, sz;
+	int ng, sx, sy, sz, nm;
 	int nx[3];
 	int ax1, ax2;
 	double *raw_data = cow_dfield_getdatabuffer(dfield);
@@ -305,6 +313,7 @@ void cv_build_cutplane(int ax)
 	sx = cow_dfield_getstride(dfield, 0);
 	sy = cow_dfield_getstride(dfield, 1);
 	sz = cow_dfield_getstride(dfield, 2);
+	nm = cow_dfield_getnmembers(dfield);
 	
 	ax = ax%3;
 	ax1 = (ax+1)%3;
@@ -317,7 +326,7 @@ void cv_build_cutplane(int ax)
 		glGenTextures(1, &(cutplanes[ax].tex));
 		cutplanes[ax].ind  = nx[ax]/2;
 	}
-	cutplanes[ax].ind = cutplanes[ax].ind % nx[ax]; 
+	cutplanes[ax].ind = cutplanes[ax].ind % nx[ax];
 	
 	//TODO: Make this use guardzones properly.
 	for(ind[0]=ng; ind[0]<nx[0]+ng; ind[0]++)
