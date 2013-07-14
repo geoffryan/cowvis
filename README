@@ -16,6 +16,6 @@ To control:
 	+/- to zoom.
 	'f' for fullscreen.
 	'c' to cycle colour maps.
-	'm' to cycle data members.
+	'123...' to view data members.
 	'xyz' to cycle locations of cut planes.
 	

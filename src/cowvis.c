@@ -118,14 +118,6 @@ void KeyboardFunc(unsigned char key, int x, int y)
 			cm++;
 			break;
 			
-		case 'm':
-			mem++;
-			mem = mem % cow_dfield_getnmembers(dfield);
-			cv_build_cutplane(0);
-			cv_build_cutplane(1);
-			cv_build_cutplane(2);
-			break;
-			
 		case 'x':
 			cutplanes[0].ind++;
 			cv_build_cutplane(0);
@@ -139,6 +131,94 @@ void KeyboardFunc(unsigned char key, int x, int y)
 		case 'z':
 			cutplanes[2].ind++;
 			cv_build_cutplane(2);
+			break;
+			
+		case '1':
+			mem = 0;
+			cv_build_cutplane(0);
+			cv_build_cutplane(1);
+			cv_build_cutplane(2);
+			break;
+		case '2':
+			if(cow_dfield_getnmembers(dfield) >= 2)
+			{
+				mem = 1;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '3':
+			if(cow_dfield_getnmembers(dfield) >= 3)
+			{
+				mem = 2;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '4':
+			if(cow_dfield_getnmembers(dfield) >= 4)
+			{
+				mem = 3;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '5':
+			if(cow_dfield_getnmembers(dfield) >= 5)
+			{
+				mem = 4;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '6':
+			if(cow_dfield_getnmembers(dfield) >= 6)
+			{
+				mem = 5;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '7':
+			if(cow_dfield_getnmembers(dfield) >= 7)
+			{
+				mem = 6;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '8':
+			if(cow_dfield_getnmembers(dfield) >= 8)
+			{
+				mem = 7;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '9':
+			if(cow_dfield_getnmembers(dfield) >= 9)
+			{
+				mem = 8;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
+			break;
+		case '0':
+			if(cow_dfield_getnmembers(dfield) >= 10)
+			{
+				mem = 9;
+				cv_build_cutplane(0);
+				cv_build_cutplane(1);
+				cv_build_cutplane(2);
+			}
 			break;
 		
 		default:
@@ -247,6 +327,9 @@ void cv_init()
 
 void cv_exit()
 {
+	int i;
+	for(i=0; i<3; i++)
+		glDeleteTextures(1, &(cutplanes[i].tex));
 	glutDestroyWindow(window);
 	cow_dfield_del(dfield);
 	cow_domain_del(dom);
