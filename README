@@ -10,3 +10,11 @@ To install:
 To run:
 	cowvis <cow_output.h5>
 
+To control:
+	Escape to exit.
+	Arrow Keys to rotate camera.
+	+/- to zoom.
+	'f' for fullscreen.
+	'c' to cycle colour maps.
+	'xyz' to cycle locations of cut planes.
+	
