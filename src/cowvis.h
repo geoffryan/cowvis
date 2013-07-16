@@ -14,6 +14,7 @@ void SpecialFunc(int key, int x, int y);
 int cv_create_window(char *title, int x, int y, int width, int height);
 void cv_init_gl(int width, int height);
 void cv_exit();
+void cv_build_cutplanes();
 void cv_wirecube(float side);
 void cv_build_cutplane(int ax);
 void cv_draw_cutplanes();

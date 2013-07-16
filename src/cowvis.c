@@ -20,7 +20,7 @@ float mag_scale = 1.1f;
 char window_name[] = "C.O.W. Vis";
 int mode = 0;
 int mem = 0;
-int cm = 0;
+int cm = 3;
 
 cow_domain *dom;
 cow_dfield *dfield;
@@ -105,6 +105,7 @@ void KeyboardFunc(unsigned char key, int x, int y)
 			fullscreen = (fullscreen+1)%2;
 			glutDestroyWindow(window);
 			window = cv_create_window(window_name, 0, 0, init_width, init_height);
+			cv_build_cutplanes();
 			break;
 			
 		case '-':
@@ -135,89 +136,69 @@ void KeyboardFunc(unsigned char key, int x, int y)
 			
 		case '1':
 			mem = 0;
-			cv_build_cutplane(0);
-			cv_build_cutplane(1);
-			cv_build_cutplane(2);
+			cv_build_cutplanes();
 			break;
 		case '2':
 			if(cow_dfield_getnmembers(dfield) >= 2)
 			{
 				mem = 1;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '3':
 			if(cow_dfield_getnmembers(dfield) >= 3)
 			{
 				mem = 2;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '4':
 			if(cow_dfield_getnmembers(dfield) >= 4)
 			{
 				mem = 3;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '5':
 			if(cow_dfield_getnmembers(dfield) >= 5)
 			{
 				mem = 4;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '6':
 			if(cow_dfield_getnmembers(dfield) >= 6)
 			{
 				mem = 5;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '7':
 			if(cow_dfield_getnmembers(dfield) >= 7)
 			{
 				mem = 6;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '8':
 			if(cow_dfield_getnmembers(dfield) >= 8)
 			{
 				mem = 7;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '9':
 			if(cow_dfield_getnmembers(dfield) >= 9)
 			{
 				mem = 8;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		case '0':
 			if(cow_dfield_getnmembers(dfield) >= 10)
 			{
 				mem = 9;
-				cv_build_cutplane(0);
-				cv_build_cutplane(1);
-				cv_build_cutplane(2);
+				cv_build_cutplanes();
 			}
 			break;
 		
@@ -335,6 +316,38 @@ void cv_exit()
 	cow_domain_del(dom);
 	cv_message("Everything swept under the rug.");
 	exit(0);
+}
+
+void cv_build_cutplanes()
+{
+	int i,j,k;
+	int nx, ny, nz, ng, sx, sy, sz;
+	double *data = cow_dfield_getdatabuffer(dfield);
+	
+	nx = cow_domain_getsize(dom, 0);
+	ny = cow_domain_getsize(dom, 1);
+	nz = cow_domain_getsize(dom, 2);
+	ng = cow_domain_getguard(dom);
+	sx = cow_dfield_getstride(dfield, 0);
+	sy = cow_dfield_getstride(dfield, 1);
+	sz = cow_dfield_getstride(dfield, 2);
+	
+	min = data[sx*ng+sy*ng+sz*ng+mem];
+	max = data[sx*ng+sy*ng+sz*ng+mem];
+	
+	for(i=ng; i<nx+ng; i++)
+		for(j=ng; j<ny+ng; j++)
+			for(k=ng; k<nz+ng; k++)
+			{
+				if(data[sx*i+sy*j+sz*k+mem] < min)
+					min = data[sx*i+sy*j+sz*k+mem];
+				if(data[sx*i+sy*j+sz*k+mem] > max)
+					max = data[sx*i+sy*j+sz*k+mem];
+			}
+	
+	cv_build_cutplane(0);
+	cv_build_cutplane(1);
+	cv_build_cutplane(2);
 }
 
 void cv_wirecube(float side)
@@ -487,7 +500,12 @@ void cv_draw_cutplanes()
 
 void cv_cmap(double val, int cmap, GLfloat *rrr, GLfloat *ggg, GLfloat *bbb)
 {
-	int num_cmaps = 3;
+	if(val < 0.0)
+		cv_message("val underbounds");
+	if(val > 1.0)
+		cv_message("val overbounds");
+	
+	int num_cmaps = 4;
 	cmap = cmap % num_cmaps;
 	
 	if(cmap == 0)
@@ -509,6 +527,41 @@ void cv_cmap(double val, int cmap, GLfloat *rrr, GLfloat *ggg, GLfloat *bbb)
 		*rrr = 0.0f;
 		*ggg = 0.0f;
 		*bbb = (GLfloat) val;
+	}
+	
+	else if(cmap == 3)
+	{
+		if(val < 0.1)
+		{
+			*bbb = 4.0*(val+0.15);
+			*ggg = 0.0;
+			*rrr = 0.0;
+		}
+		else if (val < 0.35)
+		{
+			*bbb = 1.0;
+			*ggg = 4.0*(val-0.1);
+			*rrr = 0.0;
+		}
+		else if (val < 0.6)
+		{
+			*bbb = 4.0*(0.6-val);
+			*ggg = 1.0;
+			*rrr = 4.0*(val-0.35);
+		}
+		else if (val < 0.85)
+		{
+			*bbb = 0.0;
+			*ggg = 4.0*(0.85-val);
+			*rrr = 1.0;
+		}
+		else
+		{
+			*bbb = 0.0;
+			*ggg = 0.0;
+			*rrr = 4.0*(1.1-val);
+		}
+
 	}
 	
 	else
