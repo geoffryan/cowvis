@@ -18,4 +18,6 @@ To control:
 	'c' to cycle colour maps.
 	'123...' to view data members.
 	'xyz' to cycle locations of cut planes.
+	'p' switch to radial projection mode.
+	'u' switch to cutplane mode.
 	
