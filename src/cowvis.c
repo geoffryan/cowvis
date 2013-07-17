@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -27,8 +28,8 @@ cow_dfield *dfield;
 double min;
 double max;
 
-
 cv_cutplane cutplanes[3];
+cv_projection projection_r;
 
 void ReshapeFunc(int width, int height)
 {
@@ -60,6 +61,9 @@ void DisplayFunc()
 	{
 		case 0:
 			cv_draw_cutplanes();
+			break;
+		case 1:
+			cv_draw_projection();
 			break;
 		default:
 			cv_draw_cutplanes();
@@ -134,71 +138,82 @@ void KeyboardFunc(unsigned char key, int x, int y)
 			cv_build_cutplane(2);
 			break;
 			
+		case 'p':
+			mode = 1;
+			projection_r.built = 0;
+			cv_build_scene();
+			break;
+			
+		case 'u':
+			mode = 0;
+			cv_build_scene();
+			break;
+			
 		case '1':
 			mem = 0;
-			cv_build_cutplanes();
+			cv_build_scene();
 			break;
 		case '2':
 			if(cow_dfield_getnmembers(dfield) >= 2)
 			{
 				mem = 1;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '3':
 			if(cow_dfield_getnmembers(dfield) >= 3)
 			{
 				mem = 2;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '4':
 			if(cow_dfield_getnmembers(dfield) >= 4)
 			{
 				mem = 3;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '5':
 			if(cow_dfield_getnmembers(dfield) >= 5)
 			{
 				mem = 4;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '6':
 			if(cow_dfield_getnmembers(dfield) >= 6)
 			{
 				mem = 5;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '7':
 			if(cow_dfield_getnmembers(dfield) >= 7)
 			{
 				mem = 6;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '8':
 			if(cow_dfield_getnmembers(dfield) >= 8)
 			{
 				mem = 7;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '9':
 			if(cow_dfield_getnmembers(dfield) >= 9)
 			{
 				mem = 8;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		case '0':
 			if(cow_dfield_getnmembers(dfield) >= 10)
 			{
 				mem = 9;
-				cv_build_cutplanes();
+				cv_build_scene();
 			}
 			break;
 		
@@ -304,6 +319,8 @@ void cv_init()
 	
 	for(i=0; i<3; i++)
 		cutplanes[i] = cutplane_default;
+	
+	projection_r = projection_default;
 }
 
 void cv_exit()
@@ -311,11 +328,32 @@ void cv_exit()
 	int i;
 	for(i=0; i<3; i++)
 		glDeleteTextures(1, &(cutplanes[i].tex));
+	if(projection_r.x != NULL)
+		free(projection_r.x);
+	if(projection_r.y != NULL)
+		free(projection_r.y);
 	glutDestroyWindow(window);
 	cow_dfield_del(dfield);
 	cow_domain_del(dom);
 	cv_message("Everything swept under the rug.");
 	exit(0);
+}
+
+void cv_build_scene()
+{
+	switch(mode)
+	{
+		case 0:
+			cv_build_cutplanes();
+			break;
+		case 1:
+			projection_r.built = 0;
+			cv_build_projection_r();
+			break;
+		default:
+			cv_build_cutplanes();
+			break;
+	}
 }
 
 void cv_build_cutplanes()
@@ -496,6 +534,124 @@ void cv_draw_cutplanes()
 	}
 	
 	glDisable(GL_TEXTURE_2D);
+}
+
+void cv_build_projection_r()
+{
+	int i,j,k,n;
+	int nx[3];
+	int ng, sx, sy, sz, nm, N;
+	double x,y,z,r,phi;
+	
+	nx[0] = cow_domain_getsize(dom, 0);
+	nx[1] = cow_domain_getsize(dom, 1);
+	nx[2] = cow_domain_getsize(dom, 2);
+	ng = cow_domain_getguard(dom);
+	sx = cow_dfield_getstride(dfield, 0);
+	sy = cow_dfield_getstride(dfield, 1);
+	sz = cow_dfield_getstride(dfield, 2);
+	nm = cow_dfield_getnmembers(dfield);
+	double *raw_data = cow_dfield_getdatabuffer(dfield);
+	
+	N = nx[0]*nx[1]*nx[2];
+	projection_r.num = N;
+	projection_r.x = (GLfloat *) malloc(N * sizeof(GLfloat));
+	projection_r.y = (GLfloat *) malloc(N * sizeof(GLfloat));
+	
+	x = cow_domain_positionatindex(dom, 0, ng);
+	y = cow_domain_positionatindex(dom, 1, ng);
+	z = cow_domain_positionatindex(dom, 2, ng);
+	r = x*x + y*y + z*z;
+	
+	double rmin = r;
+	double rmax = r;
+	double phimin = raw_data[sx*ng+sy*ng+sz*ng+mem];
+	double phimax = raw_data[sx*ng+sy*ng+sz*ng+mem];
+	
+	n = 0;
+	for(i=ng; i<nx[0]+ng; i++)
+	{
+		x = cow_domain_positionatindex(dom, 0, i);
+		for(j=ng; j<nx[1]+ng; j++)
+		{
+			y = cow_domain_positionatindex(dom, 1, j);
+			for(k=ng; k<nx[2]+ng; k++)
+			{
+				z = cow_domain_positionatindex(dom, 2, k);
+				r = sqrt(x*x + y*y + z*z);
+				phi = raw_data[sx*i+sy*j+sz*k+mem];
+				projection_r.x[n] = (GLfloat) r;
+				projection_r.y[n] = (GLfloat) phi;
+				n++;
+				
+				if(r < rmin)
+					rmin = r;
+				if(r > rmax)
+					rmax = r;
+				if(phi < phimin)
+					phimin = phi;
+				if(phi > phimax)
+					phimax = phi;
+			}
+		}
+	}
+	
+	projection_r.xmin = (GLfloat) rmin;
+	projection_r.xmax = (GLfloat) rmax;
+	projection_r.ymin = (GLfloat) phimin;
+	projection_r.ymax = (GLfloat) phimax;
+	
+	projection_r.X0[0] = -1.0f;
+	projection_r.X0[1] = -1.0f;
+	projection_r.X0[2] =  0.0f;
+	projection_r.X1[0] =  1.0f;
+	projection_r.X1[1] = -1.0f;
+	projection_r.X1[2] =  0.0f;
+	projection_r.X2[0] =  1.0f;
+	projection_r.X2[1] =  1.0f;
+	projection_r.X2[2] =  0.0f;
+	projection_r.X3[0] = -1.0f;
+	projection_r.X3[1] =  1.0f;
+	projection_r.X3[2] =  0.0f;
+	
+	
+	for(n=0; n<N; n++)
+	{
+		projection_r.x[n] = (projection_r.x[n] - projection_r.xmin) 
+								/ (projection_r.xmax - projection_r.xmin);
+		projection_r.y[n] = (projection_r.y[n] - projection_r.ymin) 
+								/ (projection_r.ymax - projection_r.ymin);
+	}
+	
+	projection_r.built = 1;	
+}
+
+void cv_draw_projection()
+{
+	int n;
+	GLfloat xlo, xhi, ylo, yhi;
+	
+	if(!projection_r.built)
+		cv_build_projection_r();
+	
+	glColor3f(0.9f, 0.9f, 0.9f);
+	glBegin(GL_QUADS);
+	glVertex3fv(projection_r.X0);
+	glVertex3fv(projection_r.X1);
+	glVertex3fv(projection_r.X2);
+	glVertex3fv(projection_r.X3);
+	glEnd();
+	
+	xlo = projection_r.X0[0];
+	xhi = projection_r.X1[0];
+	ylo = projection_r.X0[1];
+	yhi = projection_r.X3[1];
+	
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glBegin(GL_POINTS);
+	for(n = 0; n < projection_r.num; n++)
+		glVertex3f((xhi-xlo)*projection_r.x[n]+xlo, (yhi-ylo)*projection_r.y[n]+ylo, 0.01f);
+	glEnd();
 }
 
 void cv_cmap(double val, int cmap, GLfloat *rrr, GLfloat *ggg, GLfloat *bbb)

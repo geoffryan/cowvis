@@ -14,10 +14,13 @@ void SpecialFunc(int key, int x, int y);
 int cv_create_window(char *title, int x, int y, int width, int height);
 void cv_init_gl(int width, int height);
 void cv_exit();
+void cv_build_scene();
 void cv_build_cutplanes();
 void cv_wirecube(float side);
 void cv_build_cutplane(int ax);
 void cv_draw_cutplanes();
+void cv_build_projection_r();
+void cv_draw_projection();
 void cv_cmap(double val, int cmap, GLfloat *rrr, GLfloat *ggg, GLfloat *bbb);
 
 
@@ -33,5 +36,25 @@ struct cv_cutplane
 };
 typedef struct cv_cutplane cv_cutplane;
 
+struct cv_projection
+{
+	int built;
+	int num;
+	GLfloat *x;
+	GLfloat *y;
+	GLfloat xmin;
+	GLfloat xmax;
+	GLfloat ymin;
+	GLfloat ymax;
+	GLfloat X0[3];
+	GLfloat X1[3];
+	GLfloat X2[3];
+	GLfloat X3[3];
+};
+typedef struct cv_projection cv_projection;
+
 const struct cv_cutplane cutplane_default = {0, 0, 0, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f},
 	{0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f}};
+
+const struct cv_projection projection_default = {0, 0, NULL, NULL, 0.0f, 0.0f, 0.0f, 0.0f, 
+	{0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f}, {0.0f,0.0f,0.0f}};
